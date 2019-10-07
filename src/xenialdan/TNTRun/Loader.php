@@ -1,18 +1,10 @@
 <?php
 
-namespace xenialdan\Spleef;
+namespace xenialdan\TNTRun;
 
-use pocketmine\block\BlockIds;
 use pocketmine\entity\Entity;
-use pocketmine\entity\object\ItemEntity;
-use pocketmine\item\enchantment\Enchantment;
-use pocketmine\item\enchantment\EnchantmentInstance;
-use pocketmine\item\ItemFactory;
-use pocketmine\item\ItemIds;
-use pocketmine\item\Shovel;
+use pocketmine\entity\object\PrimedTNT;
 use pocketmine\level\Level;
-use pocketmine\nbt\tag\ListTag;
-use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -27,7 +19,7 @@ use xenialdan\gameapi\API;
 use xenialdan\gameapi\Arena;
 use xenialdan\gameapi\Game;
 use xenialdan\gameapi\Team;
-use xenialdan\Spleef\commands\SpleefCommand;
+use xenialdan\TNTRun\commands\TNTRunCommand;
 
 class Loader extends Game
 {
@@ -52,7 +44,8 @@ class Loader extends Game
     {
         $this->getServer()->getPluginManager()->registerEvents(new JoinGameListener(), $this);
         $this->getServer()->getPluginManager()->registerEvents(new LeaveGameListener(), $this);
-        $this->getServer()->getCommandMap()->register("spleef", new SpleefCommand($this));
+        $this->getServer()->getPluginManager()->registerEvents(new EventListener(), $this);
+        $this->getServer()->getCommandMap()->register("tntrun", new TNTRunCommand($this));
         /** @noinspection PhpUnhandledExceptionInspection */
         API::registerGame($this);
         foreach (glob($this->getDataFolder() . "*.json") as $v) {
@@ -67,7 +60,7 @@ class Loader extends Game
      */
     public function getNewArena(string $settingsPath): Arena
     {
-        $settings = new SpleefSettings($settingsPath);
+        $settings = new TNTRunSettings($settingsPath);
         $levelname = basename($settingsPath, ".json");
         $arena = new Arena($levelname, $this, $settings);
         $team = new Team(TextFormat::RESET, "Players");
@@ -82,18 +75,6 @@ class Loader extends Game
      */
     public function startArena(Arena $arena): void
     {
-        /** @var Shovel $shovel */
-        $shovel = ItemFactory::get(ItemIds::IRON_SHOVEL);
-        $enchantment = Enchantment::getEnchantment(Enchantment::UNBREAKING);
-        if (!is_null($enchantment))
-            $shovel->addEnchantment(new EnchantmentInstance($enchantment, 20));
-        $shovel->setUnbreakable();
-        $shovel->setNamedTagEntry((new ListTag("CanDestroy", [new StringTag((string)BlockIds::SNOW_BLOCK)])));
-
-        foreach ($arena->getPlayers() as $player) {
-            $player->getInventory()->addItem($shovel);
-        }
-
         $arena->bossbar->setSubTitle()->setTitle('Good luck! ' . count($arena->getPlayers()) . ' players alive')->setPercentage(1);
     }
 
@@ -121,7 +102,7 @@ class Loader extends Game
      */
     public function removeEntityOnArenaReset(Entity $entity): bool
     {
-        return $entity instanceof ItemEntity;
+        return $entity instanceof PrimedTNT;
     }
 
     /**
@@ -130,14 +111,14 @@ class Loader extends Game
      */
     public function setupArena(Player $player): void
     {
-        $form = new SimpleForm("Spleef arena setup");
+        $form = new SimpleForm("TNTRun arena setup");
         $na = "New arena";
         $form->addButton(new Button($na));
         $ea = "Edit arena";
         $form->addButton(new Button($ea));
         $form->setCallable(function (Player $player, $data) use ($na, $ea) {
             if ($data === $na) {
-                $form = new SimpleForm("Spleef arena setup", "New arena via");
+                $form = new SimpleForm("TNTRun arena setup", "New arena via");
                 $nw = "New world";
                 $form->addButton(new Button($nw));
                 $ew = "Existing world";
@@ -146,12 +127,12 @@ class Loader extends Game
                     $new = true;
                     if ($data === $ew) {
                         $new = false;
-                        $form = new SimpleForm("Spleef arena setup", "New arena from $data");
+                        $form = new SimpleForm("TNTRun arena setup", "New arena from $data");
                         foreach (API::getAllWorlds() as $worldName) {
                             $form->addButton(new Button($worldName));
                         }
                     } else {
-                        $form = new CustomForm("Spleef arena setup");
+                        $form = new CustomForm("TNTRun arena setup");
                         $form->addElement(new Label("New arena from $data"));
                         $form->addElement(new Input("World name", "Example: bw4x1"));
                     }
@@ -161,17 +142,17 @@ class Loader extends Game
                             API::$generator->generateLevel($setup["name"]);
                         }
                         Server::getInstance()->loadLevel($setup["name"]);
-                        $form = new CustomForm("Spleef teams setup");
+                        $form = new CustomForm("TNTRun teams setup");
                         $form->addElement(new StepSlider("Maximum players per team", array_keys(array_fill(2, 15, ""))));
                         $form->setCallable(function (Player $player, $data) use ($new, $setup) {
                             $setup["maxplayers"] = intval($data[0]);
                             //New arena
-                            $settings = new SpleefSettings($this->getDataFolder() . $setup["name"] . ".json");
+                            $settings = new TNTRunSettings($this->getDataFolder() . $setup["name"] . ".json");
                             $settings->maxPlayers = $setup["maxplayers"];
                             $settings->save();
                             $this->addArena($this->getNewArena($this->getDataFolder() . $setup["name"] . ".json"));
                             //Messages
-                            $player->sendMessage(TextFormat::GOLD . TextFormat::BOLD . "Done! Spleef arena was set up with following settings:");
+                            $player->sendMessage(TextFormat::GOLD . TextFormat::BOLD . "Done! TNTRun arena was set up with following settings:");
                             $player->sendMessage(TextFormat::AQUA . "World name: " . TextFormat::DARK_AQUA . $setup["name"]);
                             $player->sendMessage(TextFormat::AQUA . "Maximum players per team: " . TextFormat::DARK_AQUA . $setup["name"]);
                         });
@@ -181,7 +162,7 @@ class Loader extends Game
                 });
                 $player->sendForm($form);
             } elseif ($data === $ea) {
-                $form = new SimpleForm("Edit Spleef arena");
+                $form = new SimpleForm("Edit TNTRun arena");
                 $build = "Build in world";
                 $button = new Button($build);
                 $button->addImage(Button::IMAGE_TYPE_PATH, "textures/ui/icon_recipe_construction");
@@ -217,7 +198,7 @@ class Loader extends Game
                             }
                         case $delete:
                             {
-                                $form = new SimpleForm("Delete Spleef arena", "Select an arena to remove. The world will NOT be deleted");
+                                $form = new SimpleForm("Delete TNTRun arena", "Select an arena to remove. The world will NOT be deleted");
                                 foreach ($this->getArenas() as $arena) $form->addButton(new Button($arena->getLevelName()));
                                 $form->setCallable(function (Player $player, $data) {
                                     $worldname = $data;

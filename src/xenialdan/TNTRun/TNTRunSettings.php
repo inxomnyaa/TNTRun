@@ -1,26 +1,26 @@
 <?php
 
+namespace xenialdan\TNTRun;
 
-namespace xenialdan\Spleef;
-
-
-use pocketmine\block\BlockIds;
+use pocketmine\Player;
 use xenialdan\gameapi\DefaultSettings;
 
-class SpleefSettings extends DefaultSettings
+class TNTRunSettings extends DefaultSettings
 {
+    public $gamemode = Player::ADVENTURE;
     public $noDamageTeam = true;
     public $noEnvironmentDamage = true;
     public $clearInventory = true;
-    public $noBlockDrops = false;
-    public $immutableWorld = false;
+    public $noBlockDrops = true;
+    public $immutableWorld = true;
     public $noBreak = true;
     public $noBuild = true;
-    public $breakBlockIds = [BlockIds::SNOW_BLOCK];
     public $noBed = true;
+    public $noPickup = true;
     public $startNoWalk = false;
     public $noDropItem = true;
     public $noDamageEntities = true;
+    public $noDamageEnemies = true;
     public $noFallDamage = true;
     public $noExplosionDamage = true;
     public $noDrowningDamage = true;

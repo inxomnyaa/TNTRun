@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace xenialdan\Spleef\commands;
+namespace xenialdan\TNTRun\commands;
 
 use pocketmine\command\CommandSender;
 use pocketmine\command\PluginCommand;
@@ -11,16 +11,16 @@ use pocketmine\plugin\Plugin;
 use pocketmine\utils\TextFormat;
 use xenialdan\gameapi\API;
 use xenialdan\gameapi\Game;
-use xenialdan\Spleef\Loader;
+use xenialdan\TNTRun\Loader;
 
-class SpleefCommand extends PluginCommand
+class TNTRunCommand extends PluginCommand
 {
     public function __construct(Plugin $plugin)
     {
-        parent::__construct("spleef", $plugin);
-        $this->setPermission("spleef.command");
-        $this->setDescription("Spleef commands for setup or leaving a game");
-        $this->setUsage("/spleef | /spleef setup | /spleef endsetup | /spleef leave | /spleef forcestart | /spleef stop | /spleef status | /spleef info");
+        parent::__construct("tntrun", $plugin);
+        $this->setPermission("tntrun.command");
+        $this->setDescription("TNTRun commands for setup or leaving a game");
+        $this->setUsage("/tntrun | /tntrun setup | /tntrun endsetup | /tntrun leave | /tntrun forcestart | /tntrun stop | /tntrun status | /tntrun info");
     }
 
     public function execute(CommandSender $sender, string $commandLabel, array $args)
@@ -40,7 +40,7 @@ class SpleefCommand extends PluginCommand
             switch ($args[0] ?? "setup") {
                 case "setup":
                     {
-                        if (!$sender->hasPermission("spleef.command.setup")) {
+                        if (!$sender->hasPermission("tntrun.command.setup")) {
                             $sender->sendMessage(TextFormat::RED . "You do not have permissions to run this command");
                             return true;
                         }
@@ -51,7 +51,7 @@ class SpleefCommand extends PluginCommand
                     }
                 case "leave":
                     {
-                        if (!$sender->hasPermission("spleef.command.leave")) {
+                        if (!$sender->hasPermission("tntrun.command.leave")) {
                             $sender->sendMessage(TextFormat::RED . "You do not have permissions to run this command");
                             return true;
                         }
@@ -67,7 +67,7 @@ class SpleefCommand extends PluginCommand
                     }
                 case "endsetup":
                     {
-                        if (!$sender->hasPermission("spleef.command.endsetup")) {
+                        if (!$sender->hasPermission("tntrun.command.endsetup")) {
                             $sender->sendMessage(TextFormat::RED . "You do not have permissions to run this command");
                             return true;
                         }
@@ -78,7 +78,7 @@ class SpleefCommand extends PluginCommand
                     }
                 case "stop":
                     {
-                        if (!$sender->hasPermission("spleef.command.stop")) {
+                        if (!$sender->hasPermission("tntrun.command.stop")) {
                             $sender->sendMessage(TextFormat::RED . "You do not have permissions to run this command");
                             return true;
                         }
@@ -87,7 +87,7 @@ class SpleefCommand extends PluginCommand
                     }
                 case "forcestart":
                     {
-                        if (!$sender->hasPermission("spleef.command.forcestart")) {
+                        if (!$sender->hasPermission("tntrun.command.forcestart")) {
                             $sender->sendMessage(TextFormat::RED . "You do not have permissions to run this command");
                             return true;
                         }

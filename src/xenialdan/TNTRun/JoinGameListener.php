@@ -1,6 +1,6 @@
 <?php
 
-namespace xenialdan\Spleef;
+namespace xenialdan\TNTRun;
 
 use pocketmine\block\SignPost;
 use pocketmine\event\Listener;
@@ -10,7 +10,7 @@ use pocketmine\utils\TextFormat;
 
 /**
  * Class JoinListener
- * @package xenialdan\Spleef
+ * @package xenialdan\TNTRun
  * Listens for interacts for joining games or teams
  */
 class JoinGameListener implements Listener

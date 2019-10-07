@@ -1,6 +1,6 @@
 <?php
 
-namespace xenialdan\Spleef;
+namespace xenialdan\TNTRun;
 
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\Listener;
@@ -11,7 +11,7 @@ use xenialdan\gameapi\API;
 
 /**
  * Class LeaveGameListener
- * @package xenialdan\Spleef
+ * @package xenialdan\TNTRun
  * Listens for interacts for leaving games or teams
  */
 class LeaveGameListener implements Listener

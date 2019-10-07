@@ -1,8 +1,8 @@
---- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/thebigsmileXD/Spleef
+--- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/thebigsmileXD/TNTRun
 branches:
 - master
 projects:
-  Spleef:
+  TNTRun:
     path: ""
     libs:
     - src: thebigsmilexd/customui/customui

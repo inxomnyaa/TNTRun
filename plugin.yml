@@ -1,30 +1,30 @@
 ---
-name: Spleef
-main: xenialdan\Spleef\Loader
-version: 1.0.2
-api: [3.0.0, 4.0.0]
+name: TNTRun
+main: xenialdan\TNTRun\Loader
+version: 0.0.0
+api: [3.9]
 softdepend:
 - DEVirion
 - gamereward
 author: XenialDan
-prefix: '[Spleef]'
+prefix: '[TNTRun]'
 permissions:
-  spleef.command:
-    description: Base perm for spleef commands
+  tntrun.command:
+    description: Base perm for TNTRun commands
     default: true
     children:
-      spleef.command.leave:
+      tntrun.command.leave:
         default: true
-      spleef.command.forcestart:
+      tntrun.command.forcestart:
         default: op
-      spleef.command.stop:
+      tntrun.command.stop:
         default: op
-      spleef.command.endsetup:
+      tntrun.command.endsetup:
         default: op
-      spleef.command.setup:
+      tntrun.command.setup:
         default: op
-      spleef.command.info:
+      tntrun.command.info:
         default: true
-      spleef.command.status:
+      tntrun.command.status:
         default: op
 ...
