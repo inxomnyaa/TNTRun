@@ -1,11 +1,21 @@
 # TNTRun
-TNTRun using https://github.com/thebigsmileXD/gameapi
-## Clarification
-This plugin is just a proof of concept of making things easier for developers using OOP
+TNTRun for [PMMP](https://github.com/pmmp/PocketMine-MP) using [gameapi](https://github.com/thebigsmileXD/gameapi)
+## Download
+Grab a phar from [Poggit](https://poggit.pmmp.io/ci/thebigsmileXD/TNTRun)
+## Setup
+**Please use the plugin on a seperate server to your main server (lobby etc)** This is because the plugin modifies gameplay alot. You can use the `/transferserver` command to send players to the server.
 
-Though just being a concept, you could actually play this game. Go test it on [wolvesfortress.de:19133 (click to add to Minecraft)](https://server.wolvesfortress.de/quickadd.php?game=1) if you like to.
+Setup is really easy. The world can be automatically generated. To replace the map with another map, go to `/plugin_data/TNTRun/worlds` and replace your 'tntrun' data with your worlds data (you should keep the level.dat though)
 
-Setup is really easy. The world is automatically generated, called 'tntrun'. To replace the map with another map, go to /plugins/TNTRun/worlds and replace your 'tntrun' data with your worlds data (you should keep the level.dat though)
+There is a setup command, that makes your life substantially easier
+
+`/tntrun` opens an UI with settings and options to create new worlds/arenas
+
+The generated world is a void world, i suggest to use a world editor like [MagicWE2](https://github.com/thebigsmileXD/MagicWE2) to place blocks.
+
+Remember to use `/setworldspawn` in your map!
+
+When you are done with building and setting the world spawn in a map, use `/tntrun endsetup`! If you don't, the world won't get saved!
 
 Joining is done by using signs, but you can add any event for joining that you'd like - in JoinEventListener.php
 
@@ -18,11 +28,27 @@ L4:
 ```
 Then, click on it, and you are set.
 
-Breakable blocks are snow blocks (not top layers), and they will drop snow balls, so you can shoot off opponents.
+Only TNT blocks will work.
 
+Players will not be damaged and can not build in the world, but there are setting files if you really need to change anything
+### Setup rewards
+Use [gamerewards](https://github.com/thebigsmileXD/gamerewards) to give the winner rewards and execute commands.
+
+There is also a GameWinEvent getting called containing the winning players
+## Commands
+| Command | Description | Permission |
+| --- | --- | --- |
+| `/tntrun`,`/tntrun setup` | `Main command for setup` | `tntrun.command`,`tntrun.command.setup`, |
+| `/tntrun leave` | `Used to leave a game` | `tntrun.command.leave` |
+| `/tntrun forcestart` | `Force the start of an arena you are in` | `tntrun.command.forcestart` |
+| `/tntrun stop` | `Stops the current game` | `tntrun.command.stop` |
+| `/tntrun endsetup` | `Stops the setup and saves the world` | `tntrun.command.endsetup` |
+| `/tntrun info` | `Information about the plugin` | `tntrun.command.information` |
+| `/tntrun status` | `Status, TPS, Player count/percentage of TNTRun arenas` | `tntrun.command.status` |
+## From source
 **You need to set up DEVirion and install the [gameapi](https://github.com/thebigsmileXD/gameapi) virion properly if you are running from source!**
-(you could also turn this repository into a poggit project instead and use a compiled phar)
+(turn over to poggit for a compiled phar)
 **Please search up how this is done yourself!**
 
 ## Disclaimer
-This is a proof of concept repository. Please do **not** open issues about gameplay, setup issues, or similar. This repository is here to help people to understand how [gameapi](https://github.com/thebigsmileXD/gameapi) works with OOP, and how using a library can make programming alot easier. This repository is just for learning-by-reading and learning-by-doing purposes. You can modify the code by your needs and wills (see [LICENSE](https://github.com/thebigsmileXD/TNTRun/blob/master/LICENSE)).
+You can modify the code by your needs and wills (see [LICENSE](https://github.com/thebigsmileXD/TNTRun/blob/master/LICENSE)).
