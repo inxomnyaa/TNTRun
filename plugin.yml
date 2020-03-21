@@ -1,8 +1,8 @@
 ---
 name: TNTRun
 main: xenialdan\TNTRun\Loader
-version: 1.0.0
-api: [3.9]
+version: 1.0.1
+api: ['3.11']
 softdepend:
 - DEVirion
 - gamereward

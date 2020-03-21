@@ -2,12 +2,15 @@
 
 namespace xenialdan\TNTRun;
 
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\Player;
+use pocketmine\utils\TextFormat;
 use xenialdan\gameapi\API;
+use xenialdan\gameapi\Arena;
 
 /**
  * Class LeaveGameListener
@@ -22,6 +25,21 @@ class LeaveGameListener implements Listener
         if (API::isArenaOf(Loader::getInstance(), ($player = $ev->getPlayer())->getLevel()) && API::isPlaying($player, Loader::getInstance())) {
             /** @noinspection PhpUnhandledExceptionInspection */
             API::getArenaByLevel(Loader::getInstance(), $player->getLevel())->removePlayer($player);
+        }
+    }
+
+    public function onVoidDamage(EntityDamageEvent $ev)
+    {
+        if ($ev->getCause() !== EntityDamageEvent::CAUSE_VOID) return;
+        if (!($player = $ev->getEntity()) instanceof Player) return;
+        if (API::isArenaOf(Loader::getInstance(), $player->getLevel()) && API::isPlaying($player, Loader::getInstance())) {
+            $arena = API::getArenaByLevel(Loader::getInstance(), $player->getLevel());
+            if($arena->getState() !== Arena::INGAME) return;
+            $ev->setCancelled();
+            /** @var Player $player */
+            $player->getServer()->broadcastMessage(TextFormat::RED . $player->getDisplayName() . " fell into the void!");
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $arena->removePlayer($player);
         }
     }
 
