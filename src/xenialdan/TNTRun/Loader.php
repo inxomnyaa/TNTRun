@@ -2,10 +2,13 @@
 
 namespace xenialdan\TNTRun;
 
+use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\entity\object\PrimedTNT;
 use pocketmine\level\Level;
+use pocketmine\math\Vector3;
 use pocketmine\Player;
+use pocketmine\scheduler\Task;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use xenialdan\customui\elements\Button;
@@ -44,7 +47,6 @@ class Loader extends Game
     {
         $this->getServer()->getPluginManager()->registerEvents(new JoinGameListener(), $this);
         $this->getServer()->getPluginManager()->registerEvents(new LeaveGameListener(), $this);
-        $this->getServer()->getPluginManager()->registerEvents(new EventListener(), $this);
         $this->getServer()->getCommandMap()->register("tntrun", new TNTRunCommand($this));
         /** @noinspection PhpUnhandledExceptionInspection */
         API::registerGame($this);
@@ -54,9 +56,9 @@ class Loader extends Game
     }
 
     /**
-     * Create and return a new arena, used for addArena in onLoad, setupArena and resetArena (in @see ArenaAsyncCopyTask)
-     * @param string $settingsPath The path to the .json file used for the settings. Basename should be levelname
+     * Create and return a new arena, used for addArena in onLoad, setupArena and resetArena (in @param string $settingsPath The path to the .json file used for the settings. Basename should be levelname
      * @return Arena
+     * @see ArenaAsyncCopyTask)
      */
     public function getNewArena(string $settingsPath): Arena
     {
@@ -75,7 +77,40 @@ class Loader extends Game
      */
     public function startArena(Arena $arena): void
     {
-        $arena->bossbar->setSubTitle()->setTitle('Good luck! ' . count($arena->getPlayers()) . ' players alive')->setPercentage(1);
+        $arena->bossbar->setSubTitle()->setTitle(TextFormat::RED . 'Game running!')->setPercentage(1);
+        //TODO add bossbar update method
+        //$arena->bossbar->setSubTitle()->setTitle(count($arena->getPlayers()) . ' players alive')->setPercentage(1);
+        $this->getScheduler()->scheduleDelayedRepeatingTask(new class($arena) extends Task {
+                private $arena;
+                /** @var Vector3[] */
+                private $vectors = [];
+
+                public function __construct(Arena $arena)
+                {
+                    $this->arena = $arena;
+                }
+
+                /**
+                 * @inheritDoc
+                 */
+                public function onRun(int $currentTick)
+                {
+                    if ($this->arena->getState() !== Arena::INGAME) {
+                        $this->getHandler()->cancel();
+                        return;
+                    }
+                    foreach ($this->vectors as $vector) {
+                        $this->arena->getLevel()->setBlock($vector, Block::get(Block::AIR));
+                    }
+                    $this->vectors = [];
+                    foreach ($this->arena->getPlayers() as $player) {
+                        foreach ($player->getLevel()->getCollisionBlocks($player->getBoundingBox()->offsetCopy(0, -0.5, 0)) as $block)
+                            if ($block->getY() < $player->getY())
+                                $this->vectors[] = $block->asVector3();
+                    }
+                }
+            }
+            , 1, 3);
     }
 
     /**
@@ -161,7 +196,7 @@ class Loader extends Game
                     $player->sendForm($form);
                 });
                 $player->sendForm($form);
-            } elseif ($data === $ea) {
+            } else if ($data === $ea) {
                 $form = new SimpleForm("Edit TNTRun arena");
                 $build = "Build in world";
                 $button = new Button($build);
@@ -174,45 +209,45 @@ class Loader extends Game
                 $form->setCallable(function (Player $player, $data) use ($delete, $build) {
                     switch ($data) {
                         case $build:
-                            {
-                                $form = new SimpleForm($build, "Select the arena you'd like to build in");
-                                foreach ($this->getArenas() as $arena) $form->addButton(new Button($arena->getLevelName()));
-                                $form->setCallable(function (Player $player, $data) {
-                                    $worldname = $data;
-                                    $arena = API::getArenaByLevelName($this, $worldname);
-                                    $this->getServer()->broadcastMessage("Stopping arena, reason: Admin actions", $arena->getPlayers());
-                                    $arena->stopArena();
-                                    $arena->setState(Arena::SETUP);
-                                    if (!$this->getServer()->isLevelLoaded($worldname)) $this->getServer()->loadLevel($worldname);
-                                    $player->teleport($arena->getLevel()->getSpawnLocation());
-                                    $player->setGamemode(Player::CREATIVE);
-                                    $player->setAllowFlight(true);
-                                    $player->setFlying(true);
-                                    $player->getInventory()->clearAll();
-                                    $arena->getLevel()->stopTime();
-                                    $arena->getLevel()->setTime(Level::TIME_DAY);
-                                    $player->sendMessage(TextFormat::GOLD . "You may now freely edit the arena. You will not be able to break iron, gold or stained clay blocks, nor to place concrete YET");
-                                });
-                                $player->sendForm($form);
-                                break;
-                            }
+                        {
+                            $form = new SimpleForm($build, "Select the arena you'd like to build in");
+                            foreach ($this->getArenas() as $arena) $form->addButton(new Button($arena->getLevelName()));
+                            $form->setCallable(function (Player $player, $data) {
+                                $worldname = $data;
+                                $arena = API::getArenaByLevelName($this, $worldname);
+                                $this->getServer()->broadcastMessage("Stopping arena, reason: Admin actions", $arena->getPlayers());
+                                $arena->stopArena();
+                                $arena->setState(Arena::SETUP);
+                                if (!$this->getServer()->isLevelLoaded($worldname)) $this->getServer()->loadLevel($worldname);
+                                $player->teleport($arena->getLevel()->getSpawnLocation());
+                                $player->setGamemode(Player::CREATIVE);
+                                $player->setAllowFlight(true);
+                                $player->setFlying(true);
+                                $player->getInventory()->clearAll();
+                                $arena->getLevel()->stopTime();
+                                $arena->getLevel()->setTime(Level::TIME_DAY);
+                                $player->sendMessage(TextFormat::GOLD . "You may now freely edit the arena. You will not be able to break iron, gold or stained clay blocks, nor to place concrete YET");
+                            });
+                            $player->sendForm($form);
+                            break;
+                        }
                         case $delete:
-                            {
-                                $form = new SimpleForm("Delete TNTRun arena", "Select an arena to remove. The world will NOT be deleted");
-                                foreach ($this->getArenas() as $arena) $form->addButton(new Button($arena->getLevelName()));
-                                $form->setCallable(function (Player $player, $data) {
-                                    $worldname = $data;
-                                    $form = new ModalForm("Confirm delete", "Please confirm that you want to delete the arena \"$worldname\"", "Delete $worldname", "Abort");
-                                    $form->setCallable(function (Player $player, $data) use ($worldname) {
-                                        if ($data) {
-                                            $arena = API::getArenaByLevelName($this, $worldname);
-                                            $this->deleteArena($arena) ? $player->sendMessage(TextFormat::GREEN . "Successfully deleted the arena") : $player->sendMessage(TextFormat::RED . "Removed the arena, but config file could not be deleted!");
-                                        }
-                                    });
+                        {
+                            $form = new SimpleForm("Delete TNTRun arena", "Select an arena to remove. The world will NOT be deleted");
+                            foreach ($this->getArenas() as $arena) $form->addButton(new Button($arena->getLevelName()));
+                            $form->setCallable(function (Player $player, $data) {
+                                $worldname = $data;
+                                $form = new ModalForm("Confirm delete", "Please confirm that you want to delete the arena \"$worldname\"", "Delete $worldname", "Abort");
+                                $form->setCallable(function (Player $player, $data) use ($worldname) {
+                                    if ($data) {
+                                        $arena = API::getArenaByLevelName($this, $worldname);
+                                        $this->deleteArena($arena) ? $player->sendMessage(TextFormat::GREEN . "Successfully deleted the arena") : $player->sendMessage(TextFormat::RED . "Removed the arena, but config file could not be deleted!");
+                                    }
                                 });
-                                $player->sendForm($form);
-                                break;
-                            }
+                            });
+                            $player->sendForm($form);
+                            break;
+                        }
                     }
                 });
                 $player->sendForm($form);

@@ -2,6 +2,10 @@
 TNTRun for [PMMP](https://github.com/pmmp/PocketMine-MP) using [gameapi](https://github.com/thebigsmileXD/gameapi)
 ## Download
 Grab a phar from [Poggit](https://poggit.pmmp.io/ci/thebigsmileXD/TNTRun)
+## Gameplay
+- Join a game
+- Run!
+- Any block below the player will be removed 
 ## Setup
 **Please use the plugin on a seperate server to your main server (lobby etc)** This is because the plugin modifies gameplay alot. You can use the `/transferserver` command to send players to the server.
 
